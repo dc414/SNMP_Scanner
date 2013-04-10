@@ -1,7 +1,7 @@
 SNMP Scanner
 ============
 
-##Requirments:
+##Requirements:
 1. scapy
 ```
 sudo apt-get install python-scapy
