@@ -11,25 +11,20 @@ from gevent.pool import Group
 #  Scans for snmp ports with private.
 #  Add scanner for public ports as well?
 def scanner(ipaddr):
-	f = open(outputfile, 'w+')
 	p = IP(dst=ipaddr)
 	UDP(dport=161, sport=39445)
 	SNMP(community="private", PDU=SNMPget(id=1416992799, varbindlist=[SNMPvarbind(oid=ASN1_OID("1.3.6.1.2.1.1.1.0"))]))
+
+	print >> sys.stderr, "Trying " + ip + " ... "
 	pkt = sr1(p, timeout=1)
-	if pkt and pkt.sprintf("%IP.proto%") != "icmp":
+	if pkt and pkt.sprintf("%IP.proto%") != "icmp":	
+		print >> sys.stderr, "OK\n"
 		p1 = pkt.sprintf("%SNMP.PDU%").split("ASN1_STRING['", 1)
 		p2 = p1[1].split("'", 1)
-		if printverbose is True:
-			print ip + "\n"
-		if justprint is True:
-			print pkt.sprintf("%IP.src%") + " - " + p2[0] + "\n"
-		else:
-			f.write(ip + '  -  ' + pkt.sprintf("%IP.src%") + " - " + p2[0] + "\n")
-		if printip is True:
-			print pkt.sprintf("%IP.src%") + " - " + p2[0] + "\n"
-			f.write(pkt.sprintf("%IP.src%") + " - " + p2[0] + "\n")
-	f.close()
-
+		
+		print pkt.sprintf("%IP.src%") + " - " + p2[0] + "\n"
+	else:
+		print >> sys.stderr, "No reply\n"
 
 # Scan '#' of IP's
 def scanwholeip(times):
@@ -70,15 +65,6 @@ def scan():
 
 # Command-line usage
 parser = argparse.ArgumentParser(description='Scan a network for snmp(UDP port 161).')
-parser.add_argument(  # IP Address - ipaddress
-	'-i',
-	'--ip',
-	help="Define IP Address of first three octects(example: '127.0.1').",
-	required=True,
-	nargs='?',
-	action='store',
-	dest='ipaddress'
-)
 parser.add_argument(  # Stop - Boolean return
 	'-s',
 	'--stop',
@@ -90,24 +76,6 @@ parser.add_argument(  # Stop - Boolean return
 	dest='stop',
 	default=0
 )
-parser.add_argument(  # Print - printip
-	'-p',
-	'--print',
-	help="Print node IP's if snmp is 'private'.",
-	required=False,
-	action='store_false',
-	default=False,
-	dest='printip'
-)
-parser.add_argument(  # Just print - justprint
-	'-jp',
-	'--justprint',
-	help="Don't save found IP's to file, just print in console",
-	required=False,
-	action='store_false',
-	default=False,
-	dest='justprint'
-)
 parser.add_argument(  # Verbose - printverbose
 	'-v',
 	'-verbose',
@@ -116,17 +84,6 @@ parser.add_argument(  # Verbose - printverbose
 	action='store_false',
 	default=False,
 	dest='printverbose'
-)
-parser.add_argument(  # Output File - outputfile
-	'-of',
-	'--outputfile',
-	help="Define output file, default location is '/tmp/snmp_output.txt'",
-	required=False,
-	default='/tmp/snmp_output.txt',
-	type=str,
-	nargs='?',
-	action='store',
-	dest='outputfile'
 )
 
 args = vars(parser.parse_args())
