@@ -27,7 +27,7 @@ usage: snmpscan.py [-h] [-s STOP] [-v] subnet
 Scan a network for snmp(UDP port 161).
 
 positional arguments:
-  subnet      Network in subnet notation (example: 127.0.0.0/24
+  subnet      Network in subnet notation (example: 127.0.0.0/24)
 
 optional arguments:
   -h, --help  show this help message and exit

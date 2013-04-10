@@ -65,7 +65,7 @@ def scan():
 
 # Command-line usage
 parser = argparse.ArgumentParser(description='Scan a network for snmp(UDP port 161).')
-parser.add_argument("subnet", help="Network in subnet notation (example: 127.0.0.0/24")
+parser.add_argument("subnet", help="Network in subnet notation (example: 127.0.0.0/24)")
 parser.add_argument(  # Stop - Boolean return
 	'-s',
 	help="Stop scanning after a '#' of node(s) are found.",
