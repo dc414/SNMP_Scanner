@@ -4,15 +4,15 @@ import argparse
 import os
 import re
 import gevent
+import netaddr
 from gevent.pool import Group
 
 
 #  Scans for snmp ports with private.
 #  Add scanner for public ports as well?
-def scanner(iprange, i):
+def scanner(ipaddr):
 	f = open(outputfile, 'w+')
-	ip = iprange + str(i)
-	p = IP(dst=ip)
+	p = IP(dst=ipaddr)
 	UDP(dport=161, sport=39445)
 	SNMP(community="private", PDU=SNMPget(id=1416992799, varbindlist=[SNMPvarbind(oid=ASN1_OID("1.3.6.1.2.1.1.1.0"))]))
 	pkt = sr1(p, timeout=1)
@@ -34,7 +34,7 @@ def scanner(iprange, i):
 # Scan '#' of IP's
 def scanwholeip(times):
 	scannedips = []
-	ipaddress = re.search('(\d+\.\d+\.)(\d+)', iprange)
+	ipaddress = re.search('(\d+\.\d+\.)(\d+)', subnet)
 	octect1and2 = ipaddress.group(0)
 	for i in range(1, 255):
 		newipaddress = octect1and2 + str(i)
@@ -44,11 +44,11 @@ def scanwholeip(times):
 
 
 # Split scanning into separate processes
-def spawngreenlets(iprange):
+def spawngreenlets(subnet):
 	threads = []
 	group = Group()
-	for i in range(1, 255):
-		thread[i] = gevent.spawn(scanner(iprange, i, outputfile))
+	for ip in IPNetwork(subnet):
+		thread[i] = gevent.spawn(scanner(ip, outputfile))
 		gevent.sleep(0)
 		group.add(thread[i])
 	group.join()
@@ -60,7 +60,7 @@ def scan():
 	print "snmpscan is complete."
 	if justprint is True:
 		if os.stat('/tmp/snmp_output.txt')[6] == 0:
-			print "You IP address '" + iprange + "' is secure. Nothing was found under your parameters."
+			print "Your subnet '" + subnet + "' is secure. Nothing was found under your parameters."
 		else:
 			print "Something was found! The location of your outputfile is " + outputfile
 	if foundips is True:
@@ -79,17 +79,6 @@ parser.add_argument(  # IP Address - ipaddress
 	action='store',
 	dest='ipaddress'
 )
-parser.add_argument(  # Scanmore - times
-	'-sm',
-	'--scanmore',
-	help="Scan more subnets; Amount is required.",
-	required=False,
-	type=int,
-	nargs=1,
-	action='store',
-	dest='times',
-	default='1'
-)
 parser.add_argument(  # Stop - Boolean return
 	'-s',
 	'--stop',
@@ -99,14 +88,14 @@ parser.add_argument(  # Stop - Boolean return
 	nargs=1,
 	action='store',
 	dest='stop',
-	default='0'
+	default=0
 )
 parser.add_argument(  # Print - printip
 	'-p',
 	'--print',
 	help="Print node IP's if snmp is 'private'.",
 	required=False,
-	action='stored_false',
+	action='store_false',
 	default=False,
 	dest='printip'
 )
@@ -115,7 +104,7 @@ parser.add_argument(  # Just print - justprint
 	'--justprint',
 	help="Don't save found IP's to file, just print in console",
 	required=False,
-	action='stored_false',
+	action='store_false',
 	default=False,
 	dest='justprint'
 )
@@ -124,7 +113,7 @@ parser.add_argument(  # Verbose - printverbose
 	'-verbose',
 	help="Used with '-p', more verbose info.",
 	required=False,
-	action='stored_false',
+	action='store_false',
 	default=False,
 	dest='printverbose'
 )
