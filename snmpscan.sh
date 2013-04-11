@@ -21,10 +21,10 @@ while [ $# -gt 0 ]; do
 	case "$1" in
 		-h)
 			show_help
-			shift
+			exit 255
 			;;
 		-c)
-			community=$1
+			community=$2
 			;;
 		*)
 			host=$2
@@ -35,7 +35,7 @@ while [ $# -gt 0 ]; do
 done
 set -- $realargs
 
-if snmpget -v2c -c public $host:161 1.3.6.1.2.1.1.1.0 2>&1 >/dev/null; then
+if snmpget -v2c -c $community -t 1 $host:161 1.3.6.1.2.1.1.1.0 2>&1 >/dev/null; then
 	exit 0
 else
 	exit 1
