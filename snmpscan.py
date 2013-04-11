@@ -21,25 +21,19 @@ def scanner(ipaddr):
 		print subnetsecure[p]
 
 
-# Split scanning into separate processes.
-def spawngreenlets(ipaddress):
-	subnetsecure = []
-	subnetnotsecure = []
-	threads = []
-	for ip in IPNetwork(str(subnet)):
-		thread[i] = gevent.spawn(scanner(ip))
-		gevent.sleep(0)
-	gevent.joinall(threads)
-	return threads
-
-
 # Which IP's to scan.
 def whattoscan(Subnet):
 	print Subnet
-	ipandsubnet = re.search('(\d+\.\d+\.\d+.\d+)(.\d+)', Subnet, flags=0)
-	subnetlist = list(ipandsubnet.group(0).subnet(str(ipandsubnet.group(1))))
-	for ip in subnetlist:
-		spawngreenlets(ip)
+	threads = []
+	iplist = []
+	subnetlist = list(IPNetwork(Subnet))
+	for found in subnetlist:
+		iplist[found] = re.search('(\.re{9}\.\.)(\d+\.\d+\.\d+\.\d+)(\.\.)', subnetlist)
+		print iplist[found]
+	for ip in list(IP):
+		threads[i] = gevent.spawn(scanner(ip))
+		gevent.sleep(0)
+	gevent.joinall(threads)
 
 
 def scan():
