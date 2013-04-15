@@ -11,12 +11,12 @@ from netaddr import IPNetwork
 def scanner(ipaddr):
 	p = IP(dst=ipaddr)
 	UDP(dport=161, sport=39445)
-	SNMP(community="private", PDU=SNMPget(id=1416992799, varbindlist=[SNMPvarbind(oid=ASN1_OID("1.3.6.1.2.1.1.1.0"))]))
+	SNMP(community="private", PDU=SNMPget(varbindlist=[SNMPvarbind(oid=ASN1_OID("1.3.6.1.2.1.1.1.0"))]))
 	pkt = sr1(p, timeout=1)
 	if pkt and pkt.sprintf("%IP.proto%") != "icmp":
 		p1 = pkt.sprintf("%SNMP.PDU%").split("ASN1_STRING['", 1)
 		p2 = p1[1].split("'", 1)
-		subnetnotsecure[p] = pkt.sprintf("%IP.src%") + " - " + p2[0] + "\n"
+		subnetnotsecure[p] = pkt.sprintfls("%IP.src%") + " - " + p2[0] + "\n"
 	else:
 		print subnetsecure[p]
 
@@ -31,8 +31,9 @@ def whattoscan(Subnet):
 		iplist[found] = re.search('(\.re{9}\.\.)(\d+\.\d+\.\d+\.\d+)(\.\.)', subnetlist)
 		print iplist[found]
 	for ip in list(IP):
-		threads[i] = gevent.spawn(scanner(ip))
+		threads.append(gevent.spawn(printitem, i))
 		gevent.sleep(0)
+	print threads
 	gevent.joinall(threads)
 
 
