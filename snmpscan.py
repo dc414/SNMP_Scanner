@@ -1,75 +1,43 @@
 #! /usr/bin/env python
 from scapy.all import *
 import argparse
-import re
 import gevent
-from netaddr import IPNetwork
+from netaddr import *
 
 
 #  Scans for snmp ports with private.
 #  Add scanner for public ports as well?
-def scanner(ipaddr):
+def scanner(ipaddr, community):
 	p = IP(dst=ipaddr)
 	UDP(dport=161, sport=39445)
-	SNMP(community="private", PDU=SNMPget(varbindlist=[SNMPvarbind(oid=ASN1_OID("1.3.6.1.2.1.1.1.0"))]))
+	SNMP(community='%s', PDU=SNMPget(varbindlist=[SNMPvarbind(oid=ASN1_OID("1.3.6.1.2.1.1.1.0"))])) % (communtiy,)
 	pkt = sr1(p, timeout=1)
+	gevent.sleep(0)
 	if pkt and pkt.sprintf("%IP.proto%") != "icmp":
 		p1 = pkt.sprintf("%SNMP.PDU%").split("ASN1_STRING['", 1)
 		p2 = p1[1].split("'", 1)
-		subnetnotsecure[p] = pkt.sprintfls("%IP.src%") + " - " + p2[0] + "\n"
+		subnetnotsecure[p] = pkt.sprintfls("%IP.src%") + " %s\n" % (p2[0], )
 	else:
 		print subnetsecure[p]
 
 
 # Which IP's to scan.
-def whattoscan(Subnet):
-	print Subnet
-	threads = []
-	iplist = []
-	subnetlist = list(IPNetwork(Subnet))
-	for found in subnetlist:
-		iplist[found] = re.search('(\.re{9}\.\.)(\d+\.\d+\.\d+\.\d+)(\.\.)', subnetlist)
-		print iplist[found]
-	for ip in list(IP):
-		threads.append(gevent.spawn(printitem, i))
-		gevent.sleep(0)
-	print threads
+def nowscanning():
+	threads = [gevent.spawn(scanner, ip, args.community) for ip in IPNetwork(args.subnet)]
 	gevent.joinall(threads)
 
 
 def scan():
-	whattoscan(Subnet)
+	nowscanning()
 	print "snmpscan is complete."
-	print "Your subnet '" + Subnet + "' is secure. Nothing was found under your parameters."
+	print "Your subnet %s is secure. Nothing was found under your parameters." % (args.subnet,)
 
-# Command-line usage
 parser = argparse.ArgumentParser(description='Scan a network for snmp(UDP port 161).')
-parser.add_argument(
-	"Subnet",
-	type=str,
-	nargs='?',
-	help="Network in subnet notation (example: 127.0.0.0/24)",
-	action='store'
-)
-parser.add_argument(  # Stop - Boolean return
-	'-s',
-	help="Stop scanning after a '#' of node(s) are found.",
-	required=False,
-	type=int,
-	nargs=1,
-	action='store',
-	dest='stop',
-	default=0
-)
-parser.add_argument(  # Verbose - printverbose
-	'-v',
-	help="Used with '-p', more verbose info.",
-	required=False,
-	action='store_false',
-	default=False,
-	dest='printverbose'
-)
+parser.add_argument("subnet", help="Network in subnet notation (example: 127.0.0.0/24)")
+parser.add_argument("-s", "--stop", help="Stop scanning after a '#' of node(s) are found.",	type=int)
+parser.add_argument("-c", "--community", help="SNMP community string, 'private' default", default="private")
+parser.add_argument("-t", "--threads", help="threads", default=20)
+parser.add_argument("-v", "--verbose", help="verbose", required=False, action="store_true")
+args = parser.parse_args()
 
-args = vars(parser.parse_args())
-Subnet = args['Subnet']
 scan()
