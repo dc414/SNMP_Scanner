@@ -10,7 +10,7 @@ from netaddr import *
 def scanner(ipaddr, community):
 	p = IP(dst=ipaddr)
 	UDP(dport=161, sport=39445)
-	SNMP(community='%s', PDU=SNMPget(varbindlist=[SNMPvarbind(oid=ASN1_OID("1.3.6.1.2.1.1.1.0"))])) % (communtiy,)
+	SNMP(community=args.community, PDU=SNMPget(varbindlist=[SNMPvarbind(oid=ASN1_OID("1.3.6.1.2.1.1.1.0"))]))
 	pkt = sr1(p, timeout=1)
 	gevent.sleep(0)
 	if pkt and pkt.sprintf("%IP.proto%") != "icmp":
