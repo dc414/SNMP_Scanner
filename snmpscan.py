@@ -8,6 +8,7 @@ from netaddr import *
 #  Scans for snmp ports with private.
 #  Add scanner for public ports as well?
 def scanner(ipaddr, community):
+	notsecure = {}
 	print str(ipaddr) + '\n'
 	p = IP(dst=str(ipaddr))
 	UDP(dport=161, sport=39445)
@@ -18,7 +19,7 @@ def scanner(ipaddr, community):
 		p1 = pkt.sprintf("%SNMP.PDU%").split("ASN1_STRING['", 1)
 		p2 = p1[1].split("'", 1)
 		notsecure[p] = pkt.sprintfls("%IP.src%") + " %s\n" % (p2[0], )
-	print notsecure
+	print '\n\n' + notsecure
 
 
 # Which IP's to scan.
