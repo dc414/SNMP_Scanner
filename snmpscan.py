@@ -8,11 +8,11 @@ from netaddr import *
 #  Scans for snmp ports with private.
 #  Add scanner for public ports as well?
 def scanner(ipaddr, community):
-	p = IP(dst=ipaddr)
+	p = IP(dst=str(ipaddr))
 	UDP(dport=161, sport=39445)
 	SNMP(community=args.community, PDU=SNMPget(varbindlist=[SNMPvarbind(oid=ASN1_OID("1.3.6.1.2.1.1.1.0"))]))
 	pkt = sr1(p, timeout=1)
-	gevent.sleep(0)
+	gevent.sleep(1)
 	if pkt and pkt.sprintf("%IP.proto%") != "icmp":
 		p1 = pkt.sprintf("%SNMP.PDU%").split("ASN1_STRING['", 1)
 		p2 = p1[1].split("'", 1)
