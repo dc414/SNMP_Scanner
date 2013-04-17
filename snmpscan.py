@@ -19,7 +19,8 @@ def scanner(ipaddr, community):
 		p1 = pkt.sprintf("%SNMP.PDU%").split("ASN1_STRING['", 1)
 		p2 = p1[1].split("'", 1)
 		notsecure[p] = pkt.sprintfls("%IP.src%") + " %s\n" % (p2[0], )
-	print '\n\n' + notsecure
+	print '\n\n'
+	print notsecure
 
 
 # Which IP's to scan.
