@@ -16,9 +16,7 @@ def scanner(ipaddr, community):
 	if pkt and pkt.sprintf("%IP.proto%") != "icmp":
 		p1 = pkt.sprintf("%SNMP.PDU%").split("ASN1_STRING['", 1)
 		p2 = p1[1].split("'", 1)
-		subnetnotsecure[p] = pkt.sprintfls("%IP.src%") + " %s\n" % (p2[0], )
-	else:
-		print subnetsecure[p]
+		print pkt.sprintfls("%IP.src%") + " %s\n" % (p2[0], )
 
 
 # Which IP's to scan.
